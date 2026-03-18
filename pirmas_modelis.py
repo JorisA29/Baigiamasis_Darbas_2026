@@ -22,4 +22,35 @@ lango_ilgis_men = 36
 sandorio_kaina_proc = 0.001
 grazos_mazinimas = 0.3
 
-# 2 dalis. 
+# 2 dalis. duomenu atsisiuntimas
+
+def parsisiusti_duomenis(akcijos, pradzia, pabaiga):
+    kainos = yf.download(
+        akcijos,
+        start=pradzia,
+        end=pabaiga,
+        progress=False,
+        auto_adjust=True
+    )["Close"]
+
+    if isinstance(kainos, pd.Series):
+        pavadinimas = akcijos if isinstance(akcijos, str) else akcijos[0]
+        kainos = kainos.to_frame(name=pavadinimas)
+
+    return kainos.dropna(how="all")
+
+# 3 dalis. skaiciuojamos grazos ir nustatomos dato portfelio perbalansavimui 
+
+def skaiciuoti_grazas(kainos):
+    return kainos.pct_change().dropna()
+
+def menesio_pradzios_datos(kainos):
+    datos = pd.Series(kainos.index, index=kainos.index)
+    return datos.groupby(datos.dt.to_period("M")).first().tolist()
+
+# 4 dalis. apskaiciuojama portfelio apyvarta. 
+
+def apyvarta(seni_svoriai, nauji_svoriai):
+    if seni_svoriai is None:
+        return np.abs(nauji_svoriai).sum()
+    return np.abs(nauji_svoriai - seni_svoriai).sum()
