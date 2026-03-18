@@ -1,3 +1,5 @@
+# konstruojamas maksimalaus šarpo rodiklio portfelis
+
 # 1 dalis. importuojami naudojami paketai, nustatomi pagrindiniai parametrai, parenkamos akcijos
 
 import numpy as np
