@@ -39,7 +39,7 @@ def parsisiusti_duomenis(akcijos, pradzia, pabaiga):
 
     return kainos.dropna(how="all")
 
-# 3 dalis. skaiciuojamos grazos ir nustatomos dato portfelio perbalansavimui 
+# 3 dalis. skaiciuojamos grazos ir nustatomos datos portfelio perbalansavimui 
 
 def skaiciuoti_grazas(kainos):
     return kainos.pct_change().dropna()
@@ -54,3 +54,34 @@ def apyvarta(seni_svoriai, nauji_svoriai):
     if seni_svoriai is None:
         return np.abs(nauji_svoriai).sum()
     return np.abs(nauji_svoriai - seni_svoriai).sum()
+
+# 5 dalis. optimizuojami svoriai maksimalizuojant šarpo rodiklį
+
+def optimizuoti_svorius(grazos):
+    tiketinos_grazos = grazos.mean().values * grazos_mazinimas
+    kovariaciju_matrica = grazos.cov().values
+    aktyvu_kiekis = len(grazos.columns)
+
+    def tikslas(w):
+        var = w @ kovariaciju_matrica @ w
+        if var <= 0:
+            return 1e6
+
+        graza = (w @ tiketinos_grazos) * prekybos_dienu_skaicius
+        vol = np.sqrt(var * prekybos_dienu_skaicius)
+        sharpe = (graza - nerizikingu_palukanu_norma) / vol
+
+        return -sharpe
+
+    rezultatas = minimize(
+        tikslas,
+        x0=np.ones(aktyvu_kiekis) / aktyvu_kiekis,
+        method="SLSQP",
+        bounds=[svoriu_apribojimai] * aktyvu_kiekis,
+        constraints={"type": "eq", "fun": lambda w: w.sum() - 1},
+    )
+
+    if not rezultatas.success:
+        return np.ones(aktyvu_kiekis) / aktyvu_kiekis
+
+    return rezultatas.x
