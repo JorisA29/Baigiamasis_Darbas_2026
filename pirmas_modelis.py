@@ -280,6 +280,8 @@ rezultatai = ivertinti_rezultatus(verte, svoriai_df, apyvartos_df, islaidos_df)
 
 spausdinti_rezultatus(rezultatai, svoriai_df)
 
+#vizualizacija
+
 plt.figure(figsize=(12, 6))
 plt.plot(verte.index, verte, linewidth=2.5, label="Sharpe portfelis")
 plt.title("Portfelio vertės kitimas")
