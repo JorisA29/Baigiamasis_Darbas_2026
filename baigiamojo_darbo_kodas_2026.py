@@ -762,3 +762,44 @@ plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+
+
+
+# jautrumo analizės kodas
+maks_svorio_reiksmes = [0.3, 0.4, 0.5]
+temperaturos_reiksmes = [0.5, 1.0, 2.0, 5.0]
+perbalansavimo_reiksmes = ["ME", "QE", "YE"]
+
+baziniai_kwargs = dict(
+    temperatura=bazine_temperatura,
+    tendencijos_svoris=bazinis_tendencijos_svoris,
+    momento_svoris=bazinis_momento_svoris,
+    kintamumo_svoris=bazinis_kintamumo_svoris,
+    laikotarpis=bazinis_laikotarpis,
+    perbalansavimo_daznis=bazinis_perbalansavimo_daznis,
+    sandoriu_sanaudu_norma=sandoriu_sanaudu_norma,
+    metine_nerizikinga_norma=metine_nerizikinga_palukanu_norma,
+    minimalus_rezimo_aktyvo_svoris=0.00,
+    maksimalus_rezimo_aktyvo_svoris=0.40,
+    rizikos_vengimas=bazinis_rizikos_vengimas,
+    agresyvus_rizikos_vengimas=agresyvus_rizikos_vengimas,
+    neutralus_rizikos_vengimas=neutralus_rizikos_vengimas,
+    gynybinis_rizikos_vengimas=gynybinis_rizikos_vengimas,
+    grazinti_pilna=False
+)
+
+def jautrumo_lentele(parametro_pavadinimas, reiksmes, **papildomi_kwargs):
+    rezultatai = {}
+    for reiksme in reiksmes:
+        kwargs = baziniai_kwargs.copy()
+        kwargs[parametro_pavadinimas] = reiksme
+        kwargs.update(papildomi_kwargs)
+        sarpo_dict = vykdyti_atgalini_testa(**kwargs)
+        rezultatai[reiksme] = sarpo_dict
+    lentele = pd.DataFrame(rezultatai).T
+    lentele.index.name = parametro_pavadinimas
+    return lentele
+
+lentele_max_svoris = jautrumo_lentele("maksimalus_rezimo_aktyvo_svoris", maks_svorio_reiksmes)
+lentele_temp = jautrumo_lentele("temperatura", temperaturos_reiksmes)
+lentele_perbal = jautrumo_lentele("perbalansavimo_daznis", perbalansavimo_reiksmes)
